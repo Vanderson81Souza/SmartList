@@ -1,0 +1,18 @@
+{
+  "name": "SmartList Premium",
+  "short_name": "SmartList",
+  "description": "Lista de compras inteligente com inteligência financeira.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#5d61cd",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartList Premium v4 - Fixed</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5d61cd">
+    <style>
+        /* ==========================================================================
+           // --- VARIÁVEIS DE AMBIENTE E SISTEMA DE TEMAS ---
+           // Armazena a paleta de cores centralizada para fácil manutenção.
+           ========================================================================== */
+        :root {
+            /* Tema Claro Premium (Padrão) */
+            --bg-principal: #f4f6fa;
+            --bg-card: #ffffff;
+            --txt-principal: #2d3164;
+            --txt-secundario: #797db1;
+            --cor-accent: #5d61cd;
+            --cor-accent-suave: #f1f2ff;
+            --cor-borda: #e4e9f2;
+            --cor-perigo: #f8aba4;
+            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --shadow-depth: 0 8px 24px rgba(93, 97, 205, 0.08), 0 2px 6px rgba(93, 97, 205, 0.04);
+            --border-radius-lg: 16px;
+        }
+        [data-theme="escuro"] {
+            /* Tema Escuro Otimizado para Displays AMOLED */
+            --bg-principal: #0b0b14;
+            --bg-card: #16162a;
+            --txt-principal: #f5f6fa;
+            --txt-secundario: #969bc7;
+            --cor-accent: #787df6;
+            --cor-accent-suave: #2a2a54;
+            --cor-borda: #252542;
+            --cor-perigo: #e07474;
+            --shadow-depth: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="verde-claro"] {
+            /* Tema Verde Claro Eco-Friendly */
+            --bg-principal: #f2f9f3;
+            --bg-card: #ffffff;
+            --txt-principal: #1b3d22;
+            --txt-secundario: #608c66;
+            --cor-accent: #2e7d32;
+            --cor-accent-suave: #e8f5e9;
+            --cor-borda: #d0e7d2;
+            --cor-perigo: #e57373;
+            --shadow-depth: 0 8px 24px rgba(46, 125, 50, 0.06), 0 2px 6px rgba(46, 125, 50, 0.03);
+        }
+
+        /* ==========================================================================
+           // --- RESET E CONFIGURAÇÕES GERAIS ---
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-principal);
+            color: var(--txt-principal);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* ==========================================================================
+           // --- ESTRUTURA DO CABEÇALHO ---
+           ========================================================================== */
+        .app-header {
+            background-color: var(--bg-card);
+            padding: 16px 20px 12px 20px;
+            border-bottom: 1px solid var(--cor-borda);
+            z-index: 10;
+        }
+
+        .app-header__title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .app-header__title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Botão de Três Barras (Menu Hambúrguer) */
+        .btn-menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            color: var(--txt-principal);
+            cursor: pointer;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* ==========================================================================
+           // --- CARDS DE STATUS LADO A LADO ---
+           // Layout em grade de 3 colunas iguais para excelente aproveitamento de tela.
+           ========================================================================== */
+        .status-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .status-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: 12px 10px;
+            text-align: center;
+            box-shadow: var(--shadow-depth);
+            border: 1px solid var(--cor-borda);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 74px;
+        }
+
+        .status-card__label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--txt-secundario);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-card__input {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--txt-principal);
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+
+        .status-card__value {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--cor-accent);
+        }
+
+        /* ==========================================================================
+           // --- BARRA DE AÇÕES EXPANDIDA ---
+           ========================================================================== */
+        .main-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .btn-action-top {
+            background: var(--cor-accent-suave);
+            border: 1px solid var(--cor-accent);
+            border-radius: var(--border-radius-lg);
+            height: 46px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--cor-accent);
+            white-space: nowrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 0;
+        }
+        .form-control {
+            width: 100%;
+            height: 46px;
+            padding: 12px 14px;
+            border: 1px solid var(--cor-borda);
+            border-radius: var(--border-radius-lg);
+            background: var(--bg-card);
+            color: var(--txt-principal);
+            font-size: 0.9rem;
+            outline: none;
+            box-shadow: var(--shadow-depth);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--cor-accent);
+        }
+
+        /* Seletor de Abas (Tabs) de 4 colunas para a tela principal */
+        .tabs-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            background: var(--bg-principal);
+            padding: 4px;
+            border-radius: 12px;
+            margin-top: 12px;
+            border: 1px solid var(--cor-borda);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 2px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--txt-secundario);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-btn--active {
+            background-color: var(--bg-card);
+            color: var(--cor-accent);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ==========================================================================
+           // --- ÁREA CENTRAL E SEÇÕES (SPA) ---
+           ========================================================================== */
+        .app-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 16px 20px;
+            position: relative;
+        }
+
+        .app-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .app-view--active {
+            display: flex;
+        }
+
+        .items-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        /* Cabeçalho de divisores de categorias */
+        .category-group {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--txt-secundario);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 12px 0 8px 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .items-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Cards da Lista Dinâmica */
+        .item-card {
+            background: var(--bg-card);
+            padding: 14px 16px;
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--cor-borda);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-depth);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .item-card__left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-card__checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--txt-secundario);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .item-card--checked {
+            opacity: 0.5;
+            background-color: var(--bg-principal);
+        }
+
+        .item-card--checked .item-card__checkbox {
+            background-color: var(--cor-accent);
+            border-color: var(--cor-accent);
+            color: #fff;
+        }
+
+        .item-card--checked .item-card__name {
+            text-decoration: line-through;
+        }
+
+        .item-card__qty {
+            background-color: var(--cor-accent-suave);
+            color: var(--cor-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .item-card__name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .item-card__total {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        /* Ícone Especial para Deletar Lista no Histórico */
+        .btn-delete-history {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-left: 12px;
+        }
+        .btn-delete-history:hover {
+            background: rgba(248, 171, 164, 0.2);
+        }
+        /* ==========================================================================
+           // --- COMPONENTES DE ESTATÍSTICAS E GRÁFICOS (BI) ---
+           ========================================================================== */
+        .stats-summary {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--cor-borda);
+            box-shadow: var(--shadow-depth);
+            margin-bottom: 16px;
+        }
+
+        .stats-summary__title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--txt-principal);
+        }
+
+        .stats-row {
+            margin-bottom: 12px;
+        }
+
+        .stats-row__meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stats-row__value {
+            color: var(--txt-secundario);
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: var(--bg-principal);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--cor-accent);
+            border-radius: 4px;
+            transition: width 0.4s ease-out;
+            width: 0%;
+        }
+
+        .timeline-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timeline-item {
+            background: var(--bg-card);
+            padding: 14px 16px;
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--cor-borda);
+            box-shadow: var(--shadow-depth);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-item__month {
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: capitalize;
+        }
+
+        .timeline-item__total {
+            font-weight: 800;
+            color: var(--cor-accent);
+            font-size: 1rem;
+        }
+
+        /* Modais, Formulários e Menu Lateral Retrátil */
+        .calc-section { background: var(--bg-card); padding: 20px; border-radius: var(--border-radius-lg); border: 1px solid var(--cor-borda); box-shadow: var(--shadow-depth); }
+        .calc-section__title { font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--cor-borda); padding-bottom: 8px;}
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--txt-secundario); }
+        .calc-result { margin-top: 16px; padding: 14px; background: var(--cor-accent-suave); border-radius: 8px; text-align: center; font-weight: bold; color: var(--cor-accent);}
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 20px;}
+        .modal-overlay--active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--bg-card); padding: 22px; border-radius: var(--border-radius-lg); width: 100%; max-width: 400px; box-shadow: var(--shadow-depth); }
+        .modal-content__title { margin-bottom: 16px; font-size: 1.2rem; font-weight: 700; }
+        .modal-content__buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn { padding: 12px 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .btn--primary { background-color: var(--cor-accent); color: #fff; }
+        .btn--secondary { background-color: var(--bg-principal); color: var(--txt-principal); }
+        .btn--danger { background-color: var(--cor-perigo); color: #fff; }
+
+        .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .drawer-overlay--active { opacity: 1; pointer-events: auto; }
+        .drawer-sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--bg-card); box-shadow: 4px 0 24px rgba(0,0,0,0.15); z-index: 210; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; }
+        .drawer-sidebar--active { left: 0; }
+        .drawer-sidebar__title { font-size: 1.3rem; font-weight: 800; border-bottom: 1px solid var(--cor-borda); padding-bottom: 12px; margin-bottom: 8px; }
+        .drawer-menu-item { background: var(--bg-principal); border: 1px solid var(--cor-borda); padding: 12px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: left; width: 100%; color: var(--txt-principal); transition: background 0.2s; }
+        .drawer-menu-item:hover { background: var(--cor-accent-suave); color: var(--cor-accent); }
+
+        @media (min-width: 768px) {
+            .app-main, .app-header { max-width: 480px; margin: 0 auto; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+       // --- CABEÇALHO DA APLICAÇÃO ---
+       ========================================================================== */ -->
+    <header class="app-header">
+        <div class="app-header__title-row">
+            <h1 class="app-header__title">SmartList</h1>
+            <!-- Botão de três barras para abrir o Menu Lateral Retrátil -->
+            <button class="btn-menu-toggle" onclick="app.toggleDrawer(true)">☰</button>
+        </div>
+
+        <!-- Cards de Status Lado a Lado (Efeito Profundidade Otimizado) -->
+        <div class="status-container">
+            <div class="status-card">
+                <span class="status-card__label">Lista</span>
+                <input type="text" id="listMarket" class="status-card__input" placeholder="Minha Lista" oninput="app.updateCurrentListMeta()">
+            </div>
+            <div class="status-card">
+                <span class="status-card__label">Total Geral</span>
+                <span id="totalGeral" class="status-card__value">R$ 0,00</span>
+            </div>
+            <div class="status-card">
+                <span class="status-card__label">Comprado</span>
+                <span id="progressText" class="status-card__value" style="font-size: 0.85rem; font-weight: 700;">0 / 0</span>
+            </div>
+        </div>
+
+        <!-- BARRA DE AÇÕES EXPANDIDA -->
+        <div class="main-actions">
+            <button class="btn-action-top" onclick="app.openModal()">
+                <span>+</span> Novo
+            </button>
+            <button class="btn-action-top" onclick="app.createNewList()">
+                <span>✨</span> Nova Lista
+            </button>
+            <div class="search-box">
+                <input type="text" id="inputSearch" class="form-control" placeholder="🔍 Buscar item..." oninput="app.filterItems()">
+            </div>
+        </div>
+
+        <!-- Seletor de Abas Atualizado: 4 colunas nativas na Tela Principal -->
+        <nav class="tabs-nav">
+            <button id="tab-list" class="tab-btn tab-btn--active" onclick="app.switchTab('list')">📋 Lista</button>
+            <button id="tab-calc" class="tab-btn" onclick="app.switchTab('calc')">🧮 Calc</button>
+            <button id="tab-history" class="tab-btn" onclick="app.switchTab('history')">📂 Histórico</button>
+            <button id="tab-stats" class="tab-btn" onclick="app.switchTab('stats')">📊 Gráficos</button>
+        </nav>
+    </header>
+    <!-- ==========================================================================
+       // --- CORPO CENTRAL DA APLICAÇÃO (SPA) ---
+       ========================================================================== */ -->
+    <main class="app-main">
+        
+        <!-- ABA 1: LISTAGEM DE COMPRAS POR CATEGORIAS -->
+        <section id="view-list" class="app-view app-view--active">
+            <div class="items-list-scroll" id="itemsContainer">
+                <!-- Inserido dinamicamente via JS agrupado por categorias -->
+            </div>
+        </section>
+
+        <!-- ABA 2: CALCULADORA DE CUSTO-BENEFÍCIO -->
+        <section id="view-calc" class="app-view">
+            <div class="items-list-scroll">
+                <div class="calc-section">
+                    <h2 class="calc-section__title">⚖️ Custo-Benefício Proporcional</h2>
+                    <div class="form-group">
+                        <label>Nome do Item de Referência</label>
+                        <input type="text" id="calcName" class="form-control" placeholder="Ex: Queijo Prato">
+                    </div>
+                    <div class="form-group">
+                        <label>Preço do Pacote Original (R$)</label>
+                        <input type="number" id="calcPrice" class="form-control" step="0.01" min="0" oninput="app.calculateWeightPrice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso do Pacote Original (g/kg)</label>
+                        <input type="number" id="calcWeight" class="form-control" step="0.01" min="0" oninput="app.calculateWeightPrice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Desejado para Comparar (g/kg)</label>
+                        <input type="number" id="calcTargetWeight" class="form-control" step="0.01" min="0" oninput="app.calculateWeightPrice()">
+                    </div>
+                    <div class="calc-result">
+                        Valor Proporcional: <span id="calcResultValue">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: ARQUIVO DE LISTAS (HISTÓRICO COM LIXEIRA) -->
+        <section id="view-history" class="app-view">
+            <div class="items-list-scroll">
+                <div class="calc-section">
+                    <h2 class="calc-section__title">🗄️ Arquivo de Listas Salvas</h2>
+                    <p style="font-size: 0.8rem; color: var(--txt-secundario); margin-bottom: 12px; padding-left: 4px;">Toque em uma lista para carregar ou na lixeira para apagar.</p>
+                    <ul id="historyContainer" class="items-list">
+                        <!-- Inserido dinamicamente via JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: PAINEL DE INTELIGÊNCIA FINANCEIRA -->
+        <section id="view-stats" class="app-view">
+            <div class="items-list-scroll">
+                
+                <!-- Gráfico 1: Distribuição Percentual por Categoria -->
+                <div class="stats-summary">
+                    <h2 class="stats-summary__title">🛒 Gasto por Categoria (Lista Atual)</h2>
+                    <div id="statsCategoriesContainer">
+                        <!-- Inserido dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Linha do Tempo e Evolução Mensal -->
+                <div class="stats-summary">
+                    <h2 class="stats-summary__title">📉 Evolução de Gastos Mês a Mês</h2>
+                    <ul id="statsTimelineContainer" class="timeline-list">
+                        <!-- Inserido dinamicamente via JS -->
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+    <!-- ==========================================================================
+       // --- MENU LATERAL RETRÁTIL (DRAWER) ---
+       ========================================================================== */ -->
+    <div id="drawerOverlay" class="drawer-overlay" onclick="app.toggleDrawer(false)"></div>
+    <aside id="drawerSidebar" class="drawer-sidebar">
+        <h3 class="drawer-sidebar__title">Menu SmartList</h3>
+        
+        <!-- Bloco de Seleção de Temas transferido para dentro do Menu -->
+        <div class="form-group">
+            <label>Sistema de Cores (Tema)</label>
+            <select id="themeSelector" class="form-control" onchange="app.changeTheme(this.value); app.toggleDrawer(false);">
+                <option value="claro">☀️ Modo Claro</option>
+                <option value="escuro">🌙 Modo Escuro</option>
+                <option value="verde-claro">🌿 Modo Verde Claro</option>
+            </select>
+        </div>
+
+        <!-- Opção para clonar itens limpando valores financeiros -->
+        <button class="drawer-menu-item" onclick="app.cloneCurrentListWithoutPrices()">
+            ♻️ Reaproveitar Lista Atual (Zerar R$)
+        </button>
+        
+        <button class="drawer-menu-item" style="background: none; border: none; text-align: center; color: var(--cor-perigo); margin-top: auto;" onclick="app.toggleDrawer(false)">
+            Fechar Menu
+        </button>
+    </aside>
+
+    <!-- ==========================================================================
+       // --- POPUP / MODAL DE PRODUTOS ---
+       ========================================================================== */ -->
+    <div id="itemModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="modal-content__title">Adicionar Item</h3>
+            <div class="form-group">
+                <label>Item</label>
+                <input type="text" id="inputItemName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Categoria do Mercado</label>
+                <select id="inputItemCategory" class="form-control">
+                    <option value="Açougue">🥩 Açougue</option>
+                    <option value="Bebidas">🍾 Bebidas</option>
+                    <option value="Cereal / Grãos">🌾 Cereal / Grãos</option>
+                    <option value="Frios / Laticínios">🧀 Frios / Laticínios</option>
+                    <option value="Higiene Pessoal">🪥 Higiene Pessoal</option>
+                    <option value="Limpeza">🧼 Limpeza</option>
+                    <option value="Padaria">🥖 Padaria</option>
+                    <option value="Sacolão / Hortifruti">🍎 Sacolão / Hortifruti</option>
+                    <option value="Outros">📦 Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantidade</label>
+                <input type="number" id="inputItemQty" class="form-control" value="1" min="0.001" step="any" oninput="app.updateModalTotal()">
+            </div>
+            <div class="form-group">
+                <label>Valor Unitário (R$)</label>
+                <input type="number" id="inputItemPrice" class="form-control" step="0.01" min="0" oninput="app.updateModalTotal()">
+            </div>
+            <div class="form-group">
+                <label>Valor Total (R$)</label>
+                <input type="number" id="inputItemTotal" class="form-control" readonly>
+            </div>
+            <div class="modal-content__buttons">
+                <button id="btnDelete" class="btn btn--danger" style="display:none;" onclick="app.deleteItem()">Excluir</button>
+                <button class="btn btn--secondary" onclick="app.closeModal()">Cancelar</button>
+                <button class="btn btn--primary" onclick="app.saveItem()">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================================================
+       // --- JAVASCRIPT MODERNO (ES6+) - PARTE 1 ---
+       // Gerenciamento central de estados da aplicação, persistência e abas.
+       ========================================================================== */ -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker ativo!', reg.scope))
+                    .catch(err => console.error('Erro no Service Worker:', err));
+            });
+        }
+        class ShoppingApp {
+            constructor() {
+                // --- ESTADOS INTERNOS DO APP (Single Source of Truth) ---
+                this.currentListId = Date.now();
+                this.currentMarket = "";
+                // Data assume automaticamente o formato local pt-BR no momento da criação
+                this.currentDate = new Date().toLocaleDateString('pt-BR');
+                this.items = []; 
+                this.searchQuery = ""; 
+                this.editingId = null; 
+                
+                // --- CARREGAMENTO INICIAL DO HISTÓRICO ---
+                this.history = JSON.parse(localStorage.getItem('smartlist_history')) || [];
+                
+                this.initDOM();
+            }
+
+            initDOM() {
+                document.getElementById('listMarket').value = this.currentMarket;
+                this.renderHistory();
+                this.render();
+            }
+
+            /**
+             * Controla a abertura e fechamento do Menu Lateral (Drawer)
+             */
+            toggleDrawer(isOpen) {
+                const overlay = document.getElementById('drawerOverlay');
+                const sidebar = document.getElementById('drawerSidebar');
+                
+                if (isOpen) {
+                    overlay.classList.add('drawer-overlay--active');
+                    sidebar.classList.add('drawer-sidebar--active');
+                } else {
+                    overlay.classList.remove('drawer-overlay--active');
+                    sidebar.classList.remove('drawer-sidebar--active');
+                }
+            }
+
+            /**
+             * Navegação entre abas em formato Single Page Application (SPA)
+             */
+            switchTab(tabName) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-btn--active'));
+                document.querySelectorAll('.app-view').forEach(view => view.classList.remove('app-view--active'));
+
+                const targetTab = document.getElementById(`tab-${tabName}`);
+                const targetView = document.getElementById(`view-${tabName}`);
+                
+                if (targetTab) targetTab.classList.add('tab-btn--active');
+                if (targetView) targetView.classList.add('app-view--active');
+
+                // Executa tarefas específicas dependendo da aba selecionada
+                if (tabName === 'history') this.renderHistory();
+                if (tabName === 'stats') this.renderStats();
+            }
+
+            /**
+             * Inicializa um novo estado limpo de lista de compras
+             */
+            createNewList() {
+                this.currentListId = Date.now();
+                this.currentMarket = "";
+                this.currentDate = new Date().toLocaleDateString('pt-BR');
+                this.items = [];
+                document.getElementById('listMarket').value = "";
+                this.saveToStorage();
+                this.render();
+                this.switchTab('list');
+            }
+
+            /**
+             * Salva e sincroniza o estado atual com o LocalStorage
+             */
+            saveToStorage() {
+                const existingListIndex = this.history.findIndex(l => l.id === this.currentListId);
+                const listData = {
+                    id: this.currentListId,
+                    market: this.currentMarket || "Minha Lista",
+                    date: this.currentDate,
+                    items: this.items,
+                    total: this.items.reduce((sum, item) => sum + (item.qty * item.price), 0)
+                };
+
+                if (existingListIndex > -1) {
+                    this.history[existingListIndex] = listData;
+                } else {
+                    this.history.push(listData);
+                }
+                localStorage.setItem('smartlist_history', JSON.stringify(this.history));
+            }
+
+            updateCurrentListMeta() {
+                this.currentMarket = document.getElementById('listMarket').value.trim();
+                this.saveToStorage();
+            }
+
+            changeTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            /**
+             * Gerencia a abertura do modal pop-up para criação ou edição de itens
+             */
+            openModal(id = null) {
+                const modal = document.getElementById('itemModal');
+                const btnDelete = document.getElementById('btnDelete');
+                
+                if (id) {
+                    this.editingId = id;
+                    const item = this.items.find(i => i.id === id);
+                    document.getElementById('modalTitle').innerText = "Editar Item";
+                    document.getElementById('inputItemName').value = item.name;
+                    document.getElementById('inputItemCategory').value = item.category || "Outros";
+                    document.getElementById('inputItemQty').value = item.qty;
+                    document.getElementById('inputItemPrice').value = item.price;
+                    btnDelete.style.display = 'block';
+                } else {
+                    this.editingId = null;
+                    document.getElementById('modalTitle').innerText = "Adicionar Item";
+                    document.getElementById('inputItemName').value = "";
+                    document.getElementById('inputItemCategory').value = "Outros";
+                    document.getElementById('inputItemQty').value = 1;
+                    document.getElementById('inputItemPrice').value = "";
+                    btnDelete.style.display = 'none';
+                }
+                this.updateModalTotal();
+                modal.classList.add('modal-overlay--active');
+            }
+
+            closeModal() {
+                document.getElementById('itemModal').classList.remove('modal-overlay--active');
+            }
+
+            updateModalTotal() {
+                let qty = parseFloat(document.getElementById('inputItemQty').value) || 0;
+                let price = parseFloat(document.getElementById('inputItemPrice').value) || 0;
+                if (qty < 0) qty = 0;
+                if (price < 0) price = 0;
+                document.getElementById('inputItemTotal').value = (qty * price).toFixed(2);
+            }
+
+            saveItem() {
+                const name = document.getElementById('inputItemName').value.trim();
+                const category = document.getElementById('inputItemCategory').value;
+                const qty = parseFloat(document.getElementById('inputItemQty').value) || 0;
+                const price = parseFloat(document.getElementById('inputItemPrice').value) || 0;
+
+                if (!name) return alert('Por favor, informe o nome do produto.');
+                if (qty <= 0) return alert('A quantidade deve ser maior que zero.');
+
+                if (this.editingId) {
+                    const item = this.items.find(i => i.id === this.editingId);
+                    item.name = name;
+                    item.category = category;
+                    item.qty = qty;
+                    item.price = price;
+                } else {
+                    this.items.push({ id: Date.now(), name, category, qty, price, checked: false });
+                }
+
+                this.closeModal();
+                this.saveToStorage();
+                this.render();
+            }
+
+            deleteItem() {
+                if (confirm('Deseja remover este item da lista?')) {
+                    this.items = this.items.filter(i => i.id !== this.editingId);
+                    this.closeModal();
+                    this.saveToStorage();
+                    this.render();
+                }
+            }
+
+            toggleCheckItem(id, event) {
+                event.stopPropagation();
+                const item = this.items.find(i => i.id === id);
+                if (item) {
+                    item.checked = !item.checked;
+                    this.saveToStorage();
+                    this.render();
+                }
+            }
+
+            filterItems() {
+                this.searchQuery = document.getElementById('inputSearch').value.toLowerCase().trim();
+                this.render();
+            }
+
+            calculateWeightPrice() {
+                let price = parseFloat(document.getElementById('calcPrice').value) || 0;
+                let weight = parseFloat(document.getElementById('calcWeight').value) || 0;
+                let target = parseFloat(document.getElementById('calcTargetWeight').value) || 0;
+                const resultEl = document.getElementById('calcResultValue');
+
+                if (price > 0 && weight > 0 && target > 0) {
+                    const calculated = (price / weight) * target;
+                    resultEl.innerText = `R$ ${calculated.toFixed(2)}`;
+                } else {
+                    resultEl.innerText = "R$ 0,00";
+                }
+            }
+
+            /**
+             * Módulo Solicitado: Carrega uma lista arquivada como lista atual ativa ao clicar no card
+             */
+            loadListFromHistory(id) {
+                const savedList = this.history.find(l => l.id === id);
+                if (savedList) {
+                    this.currentListId = savedList.id;
+                    this.currentMarket = savedList.market;
+                    this.currentDate = savedList.date;
+                    this.items = JSON.parse(JSON.stringify(savedList.items)); 
+                    
+                    document.getElementById('listMarket').value = this.currentMarket;
+                    this.render();
+                    this.switchTab('list');
+                }
+            }
+
+            /**
+             * Módulo Solicitado: Duplica a lista gerando novo ID e zerando todos os valores financeiros
+             */
+            cloneCurrentListWithoutPrices() {
+                if (this.items.length === 0) return alert("Sua lista atual está vazia para ser reaproveitada.");
+                
+                if (confirm("Deseja criar uma cópia desta lista limpando todos os preços e marcações?")) {
+                    this.currentListId = Date.now();
+                    this.currentMarket = (this.currentMarket || "Minha Lista") + " (Cópia)";
+                    this.currentDate = new Date().toLocaleDateString('pt-BR');
+                    
+                    this.items = this.items.map(item => ({
+                        ...item,
+                        id: Date.now() + Math.random(),
+                        price: 0,
+                        checked: false
+                    }));
+
+                    document.getElementById('listMarket').value = this.currentMarket;
+                    this.toggleDrawer(false); 
+                    this.saveToStorage();
+                    this.render();
+                    this.switchTab('list');
+                }
+            }
+            /**
+             * RENDERIZAÇÃO PRINCIPAL: Filtra, agrupa por categoria em ordem alfabética
+             * e move os itens com "✓" automaticamente para o final de cada grupo.
+             */
+            render() {
+                const container = document.getElementById('itemsContainer');
+                const totalGeralEl = document.getElementById('totalGeral');
+                const progressText = document.getElementById('progressText');
+
+                container.innerHTML = "";
+                let totalCalculado = 0;
+                let itensComprados = this.items.filter(item => item.checked).length;
+
+                const filteredItems = this.items.filter(item => item.name.toLowerCase().includes(this.searchQuery));
+
+                const groups = {};
+                filteredItems.forEach(item => {
+                    totalCalculado += (item.qty * item.price);
+                    const cat = item.category || "Outros";
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(item);
+                });
+
+                const sortedCategories = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+                if (filteredItems.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; padding:20px; color:var(--txt-secundario);">Nenhum item na lista.</p>';
+                }
+
+                sortedCategories.forEach(categoryName => {
+                    const groupSection = document.createElement('div');
+                    groupSection.className = 'category-group';
+
+                    const header = document.createElement('div');
+                    header.className = 'category-header';
+                    header.innerText = `📁 ${categoryName}`;
+                    groupSection.appendChild(header);
+
+                    const ul = document.createElement('ul');
+                    ul.className = 'items-list';
+
+                    // REGRA SOLICITADA: Itens checados vão para o final de sua categoria
+                    const itemsInGroup = groups[categoryName].sort((a, b) => {
+                        if (a.checked !== b.checked) {
+                            return a.checked ? 1 : -1;
+                        }
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    itemsInGroup.forEach(item => {
+                        const itemTotal = item.qty * item.price;
+                        const li = document.createElement('li');
+                        li.className = `item-card ${item.checked ? 'item-card--checked' : ''}`;
+                        li.onclick = () => this.openModal(item.id);
+                        li.innerHTML = `
+                            <div class="item-card__left">
+                                <div class="item-card__checkbox" onclick="app.toggleCheckItem(${item.id}, event)">✓</div>
+                                <div class="item-card__content">
+                                    <span class="item-card__qty">${item.qty}x</span>
+                                    <span class="item-card__name">${item.name}</span>
+                                </div>
+                            </div>
+                            <span class="item-card__total">R$ ${itemTotal.toFixed(2)}</span>
+                        `;
+                        ul.appendChild(li);
+                    });
+
+                    groupSection.appendChild(ul);
+                    container.appendChild(groupSection);
+                });
+
+                totalGeralEl.innerText = `R$ ${totalCalculado.toFixed(2)}`;
+                progressText.innerText = `${itensComprados} / ${this.items.length}`;
+            }
+
+            /**
+             * RENDERIZAÇÃO DO HISTÓRICO COM LIXEIRA SOLICITADA
+             */
+            renderHistory() {
+                const container = document.getElementById('historyContainer');
+                container.innerHTML = "";
+                if (this.history.length === 0) {
+                    container.innerHTML = '<li style="text-align:center; padding:20px; color:var(--txt-secundario); list-style:none;">Nenhuma lista arquivada.</li>';
+                    return;
+                }
+                
+                this.history.sort((a, b) => b.id - a.id);
+                this.history.forEach(list => {
+                    const li = document.createElement('li');
+                    li.className = 'item-card';
+                    li.onclick = () => this.loadListFromHistory(list.id);
+                    li.innerHTML = `
+                        <div style="flex: 1; min-width: 0;">
+                            <strong>${list.market}</strong>
+                            <div style="font-size:0.75rem; color:var(--txt-secundario); margin-top:4px;">📅 ${list.date}</div>
+                        </div>
+                        <span class="item-card__total">R$ ${list.total.toFixed(2)}</span>
+                        <button class="btn-delete-history" onclick="app.deleteListFromHistory(${list.id}, event)">🗑️</button>
+                    `;
+                    container.appendChild(li);
+                });
+            }
+
+            deleteListFromHistory(id, event) {
+                event.stopPropagation(); // Impede o clique de abrir a lista
+                const targetList = this.history.find(l => l.id === id);
+                const marketName = targetList ? targetList.market : "esta lista";
+
+                if (confirm(`⚠️ Deseja excluir permanentemente a lista "${marketName}" do histórico?`)) {
+                    if (this.currentListId === id) {
+                        this.items = [];
+                        this.currentMarket = "";
+                        document.getElementById('listMarket').value = "";
+                    }
+                    this.history = this.history.filter(l => l.id !== id);
+                    localStorage.setItem('smartlist_history', JSON.stringify(this.history));
+                    this.renderHistory();
+                    this.render();
+                }
+            }
+            /**
+             * MOTOR DE INTELIGÊNCIA FINANCEIRA (GRÁFICOS E HISTÓRICO MENSAL)
+             * Realiza cálculos estatísticos de agregação e distribuição de custos.
+             */
+            renderStats() {
+                const catContainer = document.getElementById('statsCategoriesContainer');
+                const timelineContainer = document.getElementById('statsTimelineContainer');
+                
+                catContainer.innerHTML = "";
+                timelineContainer.innerHTML = "";
+
+                // --- 1. GRÁFICO PERCENTUAL DA LISTA ATUAL ---
+                let totalLista = this.items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+                
+                if (totalLista === 0) {
+                    catContainer.innerHTML = '<p style="text-align:center; padding:10px; font-size:0.85rem; color:var(--txt-secundario);">Adicione valores aos itens da lista atual para gerar gráficos.</p>';
+                } else {
+                    // Calcula custos acumulados faturados por categoria
+                    const catCosts = {};
+                    this.items.forEach(item => {
+                        const cat = item.category || "Outros";
+                        catCosts[cat] = (catCosts[cat] || 0) + (item.qty * item.price);
+                    });
+
+                    // Transforma em array e ordena do maior custo para o menor
+                    const sortedCats = Object.keys(catCosts).sort((a,b) => catCosts[b] - catCosts[a]);
+
+                    sortedCats.forEach(cat => {
+                        const cost = catCosts[cat];
+                        const percentage = ((cost / totalLista) * 100).toFixed(0);
+
+                        const row = document.createElement('div');
+                        row.className = 'stats-row';
+                        row.innerHTML = `
+                            <div class="stats-row__meta">
+                                <span>📁 ${cat}</span>
+                                <span class="stats-row__value">R$ ${cost.toFixed(2)} (${percentage}%)</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        `;
+                        catContainer.appendChild(row);
+                    });
+                }
+
+                // --- 2. EVOLUÇÃO MENSAL HISTÓRICA ---
+                if (this.history.length === 0) {
+                    timelineContainer.innerHTML = '<li style="text-align:center; padding:10px; font-size:0.85rem; color:var(--txt-secundario); list-style:none;">Nenhum dado histórico arquivado encontrado.</li>';
+                    return;
+                }
+
+                const monthlyAggregated = {};
+                this.history.forEach(list => {
+                    const dateParts = list.date.split('/');
+                    if (dateParts.length === 3) {
+                        // Captura o índice 1 (Mês) e índice 2 (Ano) da string para agrupamento correto (ex: "06/2026")
+                        const monthYear = `${dateParts[1]}/${dateParts[2]}`;
+                        monthlyAggregated[monthYear] = (monthlyAggregated[monthYear] || 0) + list.total;
+                    }
+                });
+
+                // Ordena os meses cronologicamente do mais novo para o mais antigo
+                const sortedMonths = Object.keys(monthlyAggregated).sort((a, b) => {
+                    const splitA = a.split('/'), splitB = b.split('/');
+                    return new Date(splitB[1], splitB[0] - 1) - new Date(splitA[1], splitA[0] - 1);
+                });
+
+                sortedMonths.forEach(month => {
+                    const totalMonth = monthlyAggregated[month];
+                    
+                    const li = document.createElement('li');
+                    li.className = 'timeline-item';
+                    li.innerHTML = `
+                        <span class="timeline-item__month">📅 Competência: ${month}</span>
+                        <span class="timeline-item__total">R$ ${totalMonth.toFixed(2)}</span>
+                    `;
+                    timelineContainer.appendChild(li);
+                });
+            }
+        }
+
+        // --- INICIALIZAÇÃO DO MOTOR DA APLICAÇÃO ---
+        // Instancia a classe e executa todo o ecossistema do app de forma integrada
+        const app = new ShoppingApp();
+    </script>
+</body>
+</html>
