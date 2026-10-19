@@ -3,7 +3,7 @@
 const CACHE_NAME = 'smartlist-v4-cache';
 const ASSETS_TO_CACHE = [
   './',
-  './index.html',
+  './lista.html',
   './manifest.json',
   './icons/icon-512.png'
 ];
