@@ -2,7 +2,7 @@
   "name": "SmartList Premium",
   "short_name": "SmartList",
   "description": "Lista de compras inteligente com inteligência financeira.",
-  "start_url": "./index.html",
+  "start_url": "./lista.html",
   "display": "standalone",
   "background_color": "#f4f6fa",
   "theme_color": "#5d61cd",
